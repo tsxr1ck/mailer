@@ -55,6 +55,52 @@ transporter.verify((error, success) => {
 });
 
 // --- API ENDPOINT ---
+
+// Intro page for the root route
+app.get('/', (req, res) => {
+    res.send(`
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Mailer Microservice</title>
+            <style>
+                body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6fb; color: #222; margin: 0; padding: 0; }
+                .container { max-width: 600px; margin: 60px auto; background: #fff; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.07); padding: 40px; }
+                h1 { color: #2a5bd7; margin-bottom: 0.5em; }
+                p { font-size: 1.1em; line-height: 1.7; }
+                .footer { margin-top: 2em; color: #888; font-size: 0.95em; }
+                code { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>📧 Mailer Microservice</h1>
+                <p>
+                    Welcome to <b>mailer.tsxr1ck.com</b>!<br>
+                    This microservice provides a simple API for sending emails using <code>POST /send-email</code>.<br>
+                    <br>
+                    <b>How to use:</b><br>
+                    Send a <code>POST</code> request to <code>/send-email</code> with the following JSON body:
+                </p>
+                <pre style="background:#f8f8fa;padding:12px;border-radius:8px;overflow-x:auto;">
+{
+  "to": "recipient@example.com",
+  "subject": "Your Subject",
+  "html": "<h1>Hello!</h1>",
+  "appName": "YourAppName"
+}
+                </pre>
+                <p class="footer">
+                    Powered by <a href="https://github.com/tsxr1ck/mailer" target="_blank">tsxr1ck/mailer</a> &mdash; Node.js, Express, and Nodemailer.
+                </p>
+            </div>
+        </body>
+        </html>
+    `);
+});
+
 // This is the single endpoint your other applications will call.
 app.post('/send-email', async (req, res) => {
     // Use a try-catch block to handle any errors during email sending
