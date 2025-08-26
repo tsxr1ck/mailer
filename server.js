@@ -8,7 +8,7 @@ const nodemailer = require('nodemailer');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const dotenv = require('dotenv');
-
+const { welcomeEmailTemplate, generateOTPEmail } = require('./templates.js');
 // Load environment variables from the appropriate .env file
 if (process.env.NODE_ENV === 'production') {
     dotenv.config({ path: '.env.production' });
@@ -22,7 +22,7 @@ const port = 3000;
 
 // Middleware to enable CORS for requests from http://localhost:5173
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: ['http://localhost:5173', 'https://*.tsxr1ck.com'],
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
 }));
@@ -106,10 +106,10 @@ app.post('/send-email', async (req, res) => {
     // Use a try-catch block to handle any errors during email sending
     try {
         // Extract data from the request body
-        const { to, subject, html, appName } = req.body;
+        const { to, subject, appName, isOtp, baseUrl,  token, otp } = req.body;
 
         // Validate the required fields
-        if (!to || !subject || !html || !appName) {
+        if (!to || !subject || !appName) {
             return res.status(400).json({ error: 'Missing required parameters: to, subject, html, or appName.' });
         }
 
@@ -117,13 +117,15 @@ app.post('/send-email', async (req, res) => {
         const fromName = appName;
         const fromEmail = process.env.SMTP_USER;
         const fromString = `"${fromName}" <${fromEmail}>`;
-
+        
         // Define the email options using the data from the request
         const mailOptions = {
             from: fromString,
             to: to,
             subject: subject,
-            html: html,
+            baseUrl: baseUrl,
+            token: token,
+            html: isOtp ? generateOTPEmail(subject, otp, appName, baseUrl, token) : welcomeEmailTemplate(appName),
         };
 
         // Send the email
@@ -131,9 +133,10 @@ app.post('/send-email', async (req, res) => {
 
         // Log the success and send a success response
         console.log("Message sent: %s", info.messageId);
-        res.status(200).json({
+        return res.status(200).json({
             message: "Email sent successfully",
             messageId: info.messageId,
+            success: true
         });
     } catch (error) {
         // If an error occurs, log it and send a 500 server error response
@@ -141,6 +144,7 @@ app.post('/send-email', async (req, res) => {
         res.status(500).json({
             error: "Failed to send email",
             details: error.message,
+            success: false
         });
     }
 });
